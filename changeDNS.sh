@@ -76,7 +76,7 @@ Enter: ';
 	read inp;
 	echo ""
 	if [ "$inp" -eq "1" ]; then
-		sudo nextdns install -config <nextDNSconfigID> -auto-activate -forwarder workserver1.fi=<xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx> -forwarder workserver2.fi=<xxx.xxx.xxx.xxx,xxx.xxx.xxx.xxx> -cache-size=10MB
+		sudo nextdns install -config <nextDNSconfigID> -auto-activate -cache-size=10MB
 		sudo nextdns activate & sudo nextdns start
 		echo "nextDNS: $(sudo nextdns status)"
 		sleep 2
