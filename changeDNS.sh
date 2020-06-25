@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# Parts of this script depends on:
+#     ripgrep (rg): https://github.com/BurntSushi/ripgrep 
+	# can probably be substituted easily by GNU grep.
+# AdguardHome: https://github.com/AdguardTeam/AdGuardHome
+#     nextdns: https://github.com/nextdns/nextdns
+#         dig: https://man.openbsd.org/dig (available in package dnsutils on debian linux)
+
+
 RED='\033[91m'
 GREEN='\033[92m'
 CYAN='\033[96m'
@@ -62,7 +70,27 @@ Enter: ';
 		fi
 		rm -f ~/AdGuardHome_MacOS/AdGuardHome.yaml
 		cp ~/AdGuardHome_MacOS/AdGuardHome-WORLD.yaml ~/AdGuardHome_MacOS/AdGuardHome.yaml
-		echo "${GREEN}[⥉]${NC}Starting ADG" ; sleep 0.5
+		echo "${GREEN}[⥉]${NC}Starting ADG"
+		cd ~/AdGuardHome_MacOS
+		networksetup -setdnsservers Wi-Fi empty
+		chksum_web=$(curl -s https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/MyBlocklist.checksum)
+		chksum_local=$(md5 -q MyBlocklist.txt)
+		if [ -f MyBlocklist.txt ] && [ "$chksum_web" == "$chksum_local" ]; then
+				echo "${GREEN}MyBlocklist Unchanged. Skipping download.${NC}"
+		else
+			echo "${CYAN}Getting Myblocklist${NC}"
+			curl -OJL 'https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/MyBlocklist.txt.xz'
+			xz -fd MyBlocklist.txt.xz
+		fi
+		chksum_web=$(curl -s https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/facebook_block.checksum)
+		chksum_local=$(md5 -q facebook_block.txt)
+		if [ "$chksum_web" == "$chksum_local" ] && [ -f facebook_block.txt ]; then
+			echo "${GREEN}Facebook blocklist Unchanged. Skipping download.${NC}"
+		else
+			echo "${CYAN}Getting Facebook blocklist${NC}"
+			curl -OJL 'https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/facebook_block.txt.xz'
+			xz -fd facebook_block.txt.xz
+		fi
 		tmux new-session -s Adguard "sudo ~/AdGuardHome_MacOS/AdGuardHome"
 		networksetup -setdnsservers Wi-Fi 127.0.0.1
 		echo "[✓]${GREEN}Adguard set as DNS server.${NC} Checking..."
@@ -86,7 +114,27 @@ Enter: ';
 		fi
 		rm -f ~/AdGuardHome_MacOS/AdGuardHome.yaml
 		cp ~/AdGuardHome_MacOS/AdGuardHome-Work.yaml ~/AdGuardHome_MacOS/AdGuardHome.yaml
-		echo "${GREEN}[⥉]${NC}Starting ADG" ; sleep 0.5
+		echo "${GREEN}[⥉]${NC}Starting ADG"
+		networksetup -setdnsservers Wi-Fi  empty
+		cd ~/AdGuardHome_MacOS
+		chksum_web=$(curl -s https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/MyBlocklist.checksum)
+		chksum_local=$(md5 -q MyBlocklist.txt)
+		if [ -f MyBlocklist.txt ] && [ "$chksum_web" == "$chksum_local" ]; then
+				echo "${GREEN}MyBlocklist Unchanged. Skipping download.${NC}"
+		else
+			echo "${CYAN}Getting Myblocklist${NC}"
+			curl -OJL 'https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/MyBlocklist.txt.xz'
+			xz -fd MyBlocklist.txt.xz
+		fi
+		chksum_web=$(curl -s https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/facebook_block.checksum)
+		chksum_local=$(md5 -q facebook_block.txt)
+		if [ "$chksum_web" == "$chksum_local" ] && [ -f facebook_block.txt ]; then
+			echo "${GREEN}Facebook blocklist Unchanged. Skipping download.${NC}"
+		else
+			echo "${CYAN}Getting Facebook blocklist${NC}"
+			curl -OJL 'https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/facebook_block.txt.xz'
+			xz -fd facebook_block.txt.xz
+		fi
 		tmux new-session -s Adguard "sudo ~/AdGuardHome_MacOS/AdGuardHome"
 		networksetup -setdnsservers Wi-Fi 127.0.0.1
 		echo "[✓]${GREEN}Adguard set as DNS server.${NC} Checking..."
