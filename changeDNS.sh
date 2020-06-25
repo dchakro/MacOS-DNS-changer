@@ -13,7 +13,12 @@ GREEN='\033[92m'
 CYAN='\033[96m'
 NC='\033[0m'
 
-# echo "nextDNS: ${RED}$(sudo nextdns status)${NC}"
+DNScheck()
+{
+  echo "${CYAN}[!]${NC}Checking DNS resolution:"
+  dig google.com +noall +answer +stats | awk '$3 == "IN" && $4 == "A"{ip=$5}/Query time:/{t=$4 " " $5}/SERVER:/{serv=$3} END{print "\nIP (Google):"ip, "\nTime: "t, "\nDNS server: "serv}'
+}
+
 echo "${CYAN}checking if ADG or NextDNS is running${NC}"
 ps -ax | rg "[A]dGuardHome|[n]extdns"
 
@@ -35,7 +40,7 @@ if [ "$var" -eq "1" ]; then
 	networksetup -setdnsservers Wi-Fi 192.168.100.27 fd5c:c307:7993:db00:2e0:4cff:fe6b:1f4
 	echo "[✓]${GREEN}PiHole set as DNS server.${NC} Checking..."
 	echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
-	nslookup google.com 
+	DNScheck
 fi
 
 if [ "$var" -eq "2" ]; then
@@ -95,7 +100,7 @@ Enter: ';
 		networksetup -setdnsservers Wi-Fi 127.0.0.1
 		echo "[✓]${GREEN}Adguard set as DNS server.${NC} Checking..."
 		echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
-		nslookup google.com 
+		DNScheck
 	fi
 	if [ "$inp" -eq "2" ]; then
 		tmux kill-session -t Adguard
@@ -139,7 +144,7 @@ Enter: ';
 		networksetup -setdnsservers Wi-Fi 127.0.0.1
 		echo "[✓]${GREEN}Adguard set as DNS server.${NC} Checking..."
 		echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
-		nslookup google.com 
+		DNScheck
 	fi
 	if [ "$inp" -eq "3" ]; then
 		rm -f ~/AdGuardHome_MacOS/AdGuardHome.yaml
@@ -159,6 +164,7 @@ Enter: ';
 		fi
 		echo "${RED}[!]${NC}DNS servers are reset to your DHCP."
 		networksetup -setdnsservers Wi-Fi empty
+		DNScheck
 	fi
 	if [ "$inp" -eq "4" ]; then
 		echo "Bye"
@@ -190,7 +196,7 @@ Enter: ';
 		sleep 0.5
 		echo "[✓]${GREEN}NextDNS set as DNS server.${NC} Checking..."
 		echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
-		nslookup google.com
+		DNScheck
 	fi
 	if [ "$inp" -eq "2" ]; then
 		echo "${CYAN}Checking nextdns instances:${NC}"
@@ -208,6 +214,7 @@ Enter: ';
 		sleep 0.5
 		echo "${RED}[!]${NC}DNS servers are reset to your DHCP."
 		networksetup -setdnsservers Wi-Fi empty
+		DNScheck
 	fi
 	if [ "$inp" -eq "3" ]; then
 		echo "Bye"
@@ -218,7 +225,7 @@ if [ "$var" -eq "4" ]; then
 	networksetup -setdnsservers Wi-Fi 91.239.100.100 89.233.43.71
 	echo "[✓]${GREEN}UncensoredDNS set as DNS server.${NC} Checking..."
 	echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
-	nslookup google.com
+	DNScheck
 fi
 
 if [ "$var" -eq "5" ]; then
@@ -227,7 +234,7 @@ if [ "$var" -eq "5" ]; then
 	networksetup -setdnsservers Wi-Fi $DNS
 	echo "[✓]${GREEN}$DNS set as DNS server.${NC} Checking..."
 	echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
-	nslookup google.com
+	DNScheck
 fi
 
 if [ "$var" -eq "6" ]; then
@@ -235,13 +242,13 @@ if [ "$var" -eq "6" ]; then
 	sleep 0.5
 	networksetup -setdnsservers Wi-Fi empty
 	echo "${RED}[!]${NC}DNS servers are reset to your DHCP."
-	nslookup google.com
+	DNScheck
 fi
 
 
 if [ "$var" -eq "7" ]; then
 	echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
-	nslookup google.com
+	DNScheck
 fi
 
 if [ "$var" -eq "8" ]; then
