@@ -2,7 +2,7 @@
 
 # Parts of this script depends on:
 #     ripgrep (rg): https://github.com/BurntSushi/ripgrep 
-	# can probably be substituted easily by GNU grep.
+	# rg can probably be substituted easily with GNU grep.
 # AdguardHome: https://github.com/AdguardTeam/AdGuardHome
 #     nextdns: https://github.com/nextdns/nextdns
 #         dig: https://man.openbsd.org/dig (available in package dnsutils on debian linux)
@@ -10,8 +10,12 @@
 
 RED='\033[91m'
 GREEN='\033[92m'
+GREEN_solid='\033[42m'
 CYAN='\033[96m'
 NC='\033[0m'
+
+# Define NextDNS config here:
+nextdns_config=''
 
 DNScheck()
 {
@@ -19,19 +23,16 @@ DNScheck()
   dig google.com +noall +answer +stats | awk '$3 == "IN" && $4 == "A"{ip=$5}/Query time:/{t=$4 " " $5}/SERVER:/{serv=$3} END{print "\nIP (Google):"ip, "\nTime: "t, "\nDNS server: "serv}'
 }
 
-echo "${CYAN}checking if ADG or NextDNS is running${NC}"
+echo "${CYAN}Checking if ADG or NextDNS is running...${NC}"
 ps -ax | rg "[A]dGuardHome|[n]extdns"
 
+echo "${GREEN_solid}\nChoose an option to change your DNS server:${NC}\c"
+
 printf '
-Set system DNS server
-1. PiHole
-2. Adguard
-3. NextDNS
-4. UncensoredDNS
-5. Custom DNS
-6. Reset DNS
-7. Display current DNS
-8. Test DNS 
+1. PiHole             2. Adguard
+3. NextDNS            4. UncensoredDNS
+5. Custom DNS         6. Reset DNS
+7. Show current DNS   8. Test DNS 
 Enter: ';
 
 read var;
@@ -173,9 +174,9 @@ fi
 
 if [ "$var" -eq "3" ]; then
 	echo ""
-	printf '1. Run
-2. Stop
-3. Exit
+	printf '1. Run NextDNS
+2. Stop NextDNS
+3. Exit script
 Enter: ';
 	read inp;
 	echo ""
@@ -189,7 +190,7 @@ Enter: ';
 		fi
 		echo "[⥉]${GREEN}Starting NextDNS${NC}"
 		echo "${CYAN}[✼]${NC}Requires root access."
-		sudo nextdns install -config <nextDNSconfigID> -auto-activate -cache-size=10MB
+		sudo nextdns install -config $nextdns_config -cache-size=10MB
 		sudo nextdns activate & sudo nextdns start
 		echo "nextDNS: $(sudo nextdns status)"
 		sudo -k # signs out of root
