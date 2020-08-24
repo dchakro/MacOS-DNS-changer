@@ -12,7 +12,7 @@ The script can set DNS servers to:
 5. Set a custom DNS server (*based on user's input*)
 6. Reset DNS server (*resets to the one broadcasted by your DHCP*)
 7. Display current DNS server(s)
-8. Short test of your DNS resolution. (*For a more thorough speed comparison you can use [R script|(https://github.com/robocopAlpha/DNSSpeedTester))*
+8. Short test of your DNS resolution. (*For a more thorough speed comparison you can use [R script|(https://github.com/dchakro/DNSSpeedTester))*
 
 
 
@@ -30,6 +30,6 @@ The script can set DNS servers to:
 
 > Tested on Mac OS Catalina running on Macbook Pro and iMac.
 
-Here is a screenshot of [MacOS DNS-changer](https://github.com/robocopAlpha/MacOS-DNS-changer) in action:
+Here is a screenshot of [MacOS DNS-changer](https://github.com/dchakro/MacOS-DNS-changer) in action:
 
 ![changeDNS](asset/changeDNS.png)
