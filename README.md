@@ -1,8 +1,12 @@
 # MacOS DNS-changer
 
 This is a shell script which is capable of setting DNS servers for WiFi (WLAN interface) on devices running MacOS.
+
+### Caveats
+
 > 1. Frequently uses colored text output. Might not be everyone's cup of tea :)
-> 2. Users sudo 
+> 2. Some options require sudo  e.g. running nextdns, adguardHome
+>    + Running a command with`sudo`is followed by `sudo -k` to revoke root access (i.e. using `sudo` again requires password).
 
 The script can set DNS servers to:
 1. A [Pihole](https://pi-hole.net) instance [*a local or a remote server*]
