@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # Parts of this script depends on:
 #     ripgrep (rg): https://github.com/BurntSushi/ripgrep 
@@ -19,6 +19,9 @@ nextdns_config=''
 
 DNScheck()
 {
+  if [ $# -eq 0 ]; then
+  	$1="twitter.com"
+  fi 	
   echo "${CYAN}[!]${NC}Checking DNS resolution:"
   dig google.com +noall +answer +stats | awk '$3 == "IN" && $4 == "A"{ip=$5}/Query time:/{t=$4 " " $5}/SERVER:/{serv=$3} END{print "\nIP (Google):"ip, "\nTime: "t, "\nDNS server: "serv}'
 }
@@ -29,10 +32,11 @@ ps -ax | rg "[A]dGuardHome|[n]extdns"
 echo "${GREEN_solid}\nChoose an option to change your DNS server:${NC}\c"
 
 printf '
-1. PiHole             2. Adguard
-3. NextDNS            4. UncensoredDNS
-5. Custom DNS         6. Reset DNS
-7. Show current DNS   8. Test DNS 
+1. PiHole             2. AdguardHome
+3. NextDNS            4. Adguard-DNS
+5. UncensoredDNS      6. CZ_NIC
+7. Custom DNS         8. Reset DNS
+9. Show current DNS  10. Test DNS 
 Enter: ';
 
 read var;
@@ -79,29 +83,15 @@ Enter: ';
 		echo "${GREEN}[⥉]${NC}Starting ADG"
 		cd ~/AdGuardHome_MacOS
 		networksetup -setdnsservers Wi-Fi empty
-		chksum_web=$(curl -s https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/MyBlocklist.checksum)
-		chksum_local=$(md5 -q MyBlocklist.txt)
-		if [ -f MyBlocklist.txt ] && [ "$chksum_web" == "$chksum_local" ]; then
-				echo "${GREEN}MyBlocklist Unchanged. Skipping download.${NC}"
-		else
-			echo "${CYAN}Getting Myblocklist${NC}"
-			curl -OJL 'https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/MyBlocklist.txt.xz'
-			xz -fd MyBlocklist.txt.xz
-		fi
-		chksum_web=$(curl -s https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/facebook_block.checksum)
-		chksum_local=$(md5 -q facebook_block.txt)
-		if [ "$chksum_web" == "$chksum_local" ] && [ -f facebook_block.txt ]; then
-			echo "${GREEN}Facebook blocklist Unchanged. Skipping download.${NC}"
-		else
-			echo "${CYAN}Getting Facebook blocklist${NC}"
-			curl -OJL 'https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/facebook_block.txt.xz'
-			xz -fd facebook_block.txt.xz
-		fi
+		curl -L 'https://www.dropbox.com/sh/oyjii6ndqduixt8/AADn57717lc0TE4AW5dxB0p4a?dl=1' --output ./blocklist.zip && unzip ./blocklist.zip 
+		rm ./blocklist.zip
+		xz -fd MyBlocklist.txt.xz
+		xz -fd facebook_block.txt.xz
 		tmux new-session -s Adguard "sudo ~/AdGuardHome_MacOS/AdGuardHome"
 		networksetup -setdnsservers Wi-Fi 127.0.0.1
 		echo "[✓]${GREEN}Adguard set as DNS server.${NC} Checking..."
 		echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
-		DNScheck
+		DNScheck  
 	fi
 	if [ "$inp" -eq "2" ]; then
 		tmux kill-session -t Adguard
@@ -123,29 +113,15 @@ Enter: ';
 		echo "${GREEN}[⥉]${NC}Starting ADG"
 		networksetup -setdnsservers Wi-Fi  empty
 		cd ~/AdGuardHome_MacOS
-		chksum_web=$(curl -s https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/MyBlocklist.checksum)
-		chksum_local=$(md5 -q MyBlocklist.txt)
-		if [ -f MyBlocklist.txt ] && [ "$chksum_web" == "$chksum_local" ]; then
-				echo "${GREEN}MyBlocklist Unchanged. Skipping download.${NC}"
-		else
-			echo "${CYAN}Getting Myblocklist${NC}"
-			curl -OJL 'https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/MyBlocklist.txt.xz'
-			xz -fd MyBlocklist.txt.xz
-		fi
-		chksum_web=$(curl -s https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/facebook_block.checksum)
-		chksum_local=$(md5 -q facebook_block.txt)
-		if [ "$chksum_web" == "$chksum_local" ] && [ -f facebook_block.txt ]; then
-			echo "${GREEN}Facebook blocklist Unchanged. Skipping download.${NC}"
-		else
-			echo "${CYAN}Getting Facebook blocklist${NC}"
-			curl -OJL 'https://gitlab.com/robocopAlpha/pihole_lists/-/raw/master/facebook_block.txt.xz'
-			xz -fd facebook_block.txt.xz
-		fi
+		curl -L 'https://www.dropbox.com/sh/oyjii6ndqduixt8/AADn57717lc0TE4AW5dxB0p4a?dl=1' --output ./blocklist.zip && unzip ./blocklist.zip 
+		rm ./blocklist.zip
+		xz -fd MyBlocklist.txt.xz
+		xz -fd facebook_block.txt.xz
 		tmux new-session -s Adguard "sudo ~/AdGuardHome_MacOS/AdGuardHome"
 		networksetup -setdnsservers Wi-Fi 127.0.0.1
 		echo "[✓]${GREEN}Adguard set as DNS server.${NC} Checking..."
 		echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
-		DNScheck
+		DNScheck  
 	fi
 	if [ "$inp" -eq "3" ]; then
 		rm -f ~/AdGuardHome_MacOS/AdGuardHome.yaml
@@ -223,13 +199,27 @@ Enter: ';
 fi
 
 if [ "$var" -eq "4" ]; then
-	networksetup -setdnsservers Wi-Fi 91.239.100.100 89.233.43.71
-	echo "[✓]${GREEN}UncensoredDNS set as DNS server.${NC} Checking..."
+	networksetup -setdnsservers Wi-Fi 94.140.14.15 94.140.15.16
+	echo "[✓]${GREEN}AdGuard-DNS set as DNS server.${NC} Checking..."
 	echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
 	DNScheck
 fi
 
 if [ "$var" -eq "5" ]; then
+	networksetup -setdnsservers Wi-Fi 91.239.100.100 89.233.43.71
+	echo "[✓]${GREEN}UncensoredDNS set as DNS server.${NC} Checking..."
+	echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
+	DNScheck 
+fi
+
+if [ "$var" -eq "6" ]; then
+	networksetup -setdnsservers Wi-Fi 193.17.47.1 185.43.135.1
+	echo "[✓]${GREEN}CZ-NIC DNS set as DNS server.${NC} Checking..."
+	echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
+	DNScheck 
+fi
+
+if [ "$var" -eq "7" ]; then
 	printf 'Enter a desired DNS server: '
 	read DNS;
 	networksetup -setdnsservers Wi-Fi $DNS
@@ -238,7 +228,7 @@ if [ "$var" -eq "5" ]; then
 	DNScheck
 fi
 
-if [ "$var" -eq "6" ]; then
+if [ "$var" -eq "8" ]; then
 	echo "[✓]${RED}Removing${NC} these DNS servers:\n${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
 	sleep 0.5
 	networksetup -setdnsservers Wi-Fi empty
@@ -247,12 +237,12 @@ if [ "$var" -eq "6" ]; then
 fi
 
 
-if [ "$var" -eq "7" ]; then
+if [ "$var" -eq "9" ]; then
 	echo "Current DNS server: ${CYAN}$(networksetup -getdnsservers Wi-Fi)${NC}"
 	DNScheck
 fi
 
-if [ "$var" -eq "8" ]; then
+if [ "$var" -eq "10" ]; then
 	dig google.com
 	ping 8.8.8.8 -c 4
 fi
